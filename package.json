@@ -1,13 +1,8 @@
 {
   "name": "databroker",
-  "version": "0.1.1",
+  "version": "0.2",
   "description": "Utility for simplifying the use of the fetch API",
   "main": "index.js",
-  "scripts": {
-    "pretest": "node_modules/.bin/webpack-serve ./test/webpack.config.js --open --port=8957",
-    "test": "echo \"Open up the test.html file in your browser.\"",
-    "build": "node_modules/.bin/webpack ./src/data_broker.js --output-filename data_broker.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/claytongulick/databroker.git"
@@ -23,13 +18,5 @@
   "bugs": {
     "url": "https://github.com/claytongulick/databroker/issues"
   },
-  "homepage": "https://github.com/claytongulick/databroker#readme",
-  "devDependencies": {
-    "chai": "^4.1.2",
-    "jquery": "^3.3.1",
-    "mocha": "^5.2.0",
-    "webpack": "^4.16.4",
-    "webpack-cli": "^3.1.0",
-    "webpack-serve": "^2.0.2"
-  }
+  "homepage": "https://github.com/claytongulick/databroker#readme"
 }
