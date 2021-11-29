@@ -2,17 +2,8 @@
 
 //TODO: this needs to be moved to binding since it relys on a ton of native web funcationality - fetch, FormData, encodeURIComponent, etc..
 
-import DataWipe from './isolate-data_wipe';
-import ApplicationState from './isolate-application_state';
+import ApplicationState from 'applicationstate';
 
-//we have a base url here so that we can issue explicit calls to an ip for testing, if needed
-let config = {
-    base_url: ''
-    //base_url: 'http://192.168.1.3:3000/'
-    //base_url: 'http://localhost:3000/'
-    // base_url: 'http://10.0.2.2:3000/'
-    // base_url: 'https://192.168.1.152:3000/'
-};
 
 /**
  * Data broker class, handles communication to the server and returns a promise.
@@ -29,8 +20,9 @@ class Broker {
         return Broker._instance;
     }
 
-    constructor() {
-        this.base_url = config.base_url;
+    constructor(base_url) {
+        let global_base_url = Broker?.config?.base_url;
+        this.base_url = base_url || global_base_url || '';
     }
 
     addEventListener(event_name, listener) {
@@ -65,8 +57,13 @@ class Broker {
             key => {
                     let val = object[key];
                     if (typeof val !== 'string') {
-                        val = JSON.stringify(val);
-                    form_data.set(key, val);
+                        if(typeof val == 'FileList')
+                            for(let file of val)
+                                form_data.append(key,file);
+                        else if(typeof val == 'File')
+                            form_data.set(key, val);
+                        else
+                            form_data.set(key, JSON.stringify(val));
                 }
         });
         return form_data;
@@ -113,21 +110,37 @@ class Broker {
      * @param data
      * @returns {*}
      */
-    async get(url, data) {
+    async get(url, data, options) {
+        options = Object.assign({
+            blob: false,
+            arraybuffer: false,
+            cache: false,
+            timing: false
+        }, options);
         this.dispatchEvent('loading');
         try {
 
+            if(options.timing) console.time('broker-get-serialize-params');
             let query_string = this.serializeParams(data);
             if (data) query_string = "?" + query_string;
             let get_url = this.base_url + url + query_string;
-            const response = await fetch(get_url,
-                {
-                    method: 'get',
-                    headers: this.getHeaders(),
-                    cache: 'no-store',
+            if(options.timing) console.timeEnd('broker-get-serialize-params');
+            if(options.timing) console.time('broker-get-headers');
+            let get_options = {
+                    method: 'GET',
+                    headers: this.getHeaders({cache: options.cache, blob: options.blob}),
                     credentials: 'include'
-                });
-            let response_body = await this.handleResponse(response);
+            };
+            if(options.timing) console.timeEnd('broker-get-headers');
+            if(!options.cache)
+                get_options.cache = 'no-store';
+
+            if(options.timing) console.time('broker-get-fetch');
+            const response = await fetch(get_url, get_options);
+            if(options.timing) console.timeEnd('broker-get-fetch');
+            if(options.timing) console.time('broker-get-handle-response');
+            let response_body = await this.handleResponse(response, options);
+            if(options.timing) console.timeEnd('broker-get-handle-response');
             this.dispatchEvent('loading_complete');
             return response_body;
         }
@@ -155,7 +168,7 @@ class Broker {
             let put_url = this.base_url + url;
             const response = await fetch(put_url,
                 {
-                    method: 'put',
+                    method: 'PUT',
                     headers: this.getHeaders(options),
                     cache: 'no-store',
                     credentials: 'include',
@@ -190,7 +203,7 @@ class Broker {
             let post_url = this.base_url + url;
             const response = await fetch(post_url,
                 {
-                    method: 'post',
+                    method: 'POST',
                     headers: this.getHeaders(options),
                     cache: 'no-store',
                     credentials: 'include',
@@ -214,21 +227,21 @@ class Broker {
      * @param {*} patch 
      * @param {*} options 
      */
-    async patch(url, patch) {
-        let options = {
+    async patch(url, patch, options) {
+        options = Object.assign({
             json: true,
             multipart: false
-        };
+        },options);
         this.dispatchEvent('loading');
         try {
             let patch_url = this.base_url + url;
             const response = await fetch(patch_url,
                 {
-                    method: 'patch',
+                    method: 'PATCH',
                     headers: this.getHeaders(options),
                     cache: 'no-store',
                     credentials: 'include',
-                    body: this.getBody(data, options)
+                    body: this.getBody(patch, options)
                 });
 
             let response_body = await this.handleResponse(response);
@@ -257,7 +270,7 @@ class Broker {
             let get_url = this.base_url + url + query_string;
             const response = await fetch(get_url,
                 {
-                    method: 'delete',
+                    method: 'DELETE',
                     headers: this.getHeaders(),
                     cache: 'no-store',
                     credentials: 'include'
@@ -277,7 +290,9 @@ class Broker {
     getHeaders(options) {
         let default_options = {
             json: false,
-            multipart: false
+            multipart: false,
+            cache: false,
+            client_version: true
         }
         options = Object.assign(default_options, options);
         let content_type = 'application/x-www-form-urlencoded';
@@ -287,18 +302,33 @@ class Broker {
             content_type = 'multipart/form-data';
 
         let header_token = ApplicationState.get('app.jwt') || "";
-        return {
-            'Cache-Control': 'no-cache',
-            'Accept': 'application/json',
+
+        let headers = {
             'Content-Type': content_type,
             'Authorization': 'Bearer ' + header_token
         }
+        if(!options.blob)
+            headers['Accept'] = 'application/json';
+        if(!options.cache)
+            headers['Cache-Control'] = 'no-cache';
+        if(options.client_version)
+            headers['client-software-version'] = VERSION;
+        return headers;
     }
 
-    async handleResponse(response) {
+    async handleResponse(response, options) {
         const status = response.status;
+        let body;
+        let err;
 
         switch (status) {
+            case 400: //bad request
+                body = await response.text();
+                err = new Error("400 bad request");
+                err.code = status;
+                err.body = body;
+                throw err;
+                break;
             case 401: //forbidden - for missing credentials
                 this.dispatchEvent('missing_credentials');
                 throw new Error("401 forbidden")
@@ -307,23 +337,33 @@ class Broker {
                 this.dispatchEvent('unauthorized');
                 throw new Error("403 unauthorized")
                 break;
-            case 451: //burn baby, burn - remote wipe
-                this.handleRemoteWipe();
-                throw new Error("451 remote wipe")
+            case 409: //client out of date
+                this.dispatchEvent('need_update');
+                throw new Error("409 out of date");
                 break;
+            case 418: //I'm a teapot
+                body = await response.text();
+                err = new Error("418 I'm a teapot");
+                err.code = status;
+                err.body = body;
+                throw err;
             default: //check for success
-                let body = await response.json();
+                if(options && options.blob)
+                    body = await response.blob();
+                else if(options && options.arraybuffer)
+                    body = await response.arrayBuffer();
+                else
+                    body = await response.json();
                 if (!response.ok) {
-                    throw new Error(`${response.status}: ${response.statusText} -- ${JSON.stringify(body)}`);
+                    err = new Error(`${response.status}: ${response.statusText} -- ${JSON.stringify(body)}`);
+                    err.code = status;
+                    err.body = body;
+                    throw err;
                 }
                 return body;
                 break;
         }
 
-    }
-
-    handleRemoteWipe() {
-        DataWipe.wipeDeviceData();
     }
 
 }
