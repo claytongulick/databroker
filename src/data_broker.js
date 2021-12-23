@@ -13,7 +13,7 @@ import ApplicationState from 'applicationstate';
  */
 class Broker {
 
-    static config = class {
+    static config = new class {
         get base_url(){return Broker._base_url}
         set base_url(value) {
             Broker._base_url = value;
