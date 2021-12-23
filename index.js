@@ -1,3 +1,5 @@
-import Broker from './src/data_broker';
+import {Broker} from './src/data_broker';
+import broker from './src/data_broker';
 
-export default Broker;
+export {Broker}
+export default broker;

@@ -13,6 +13,15 @@ import ApplicationState from 'applicationstate';
  */
 class Broker {
 
+    static config = class {
+        get base_url(){return Broker._base_url}
+        set base_url(value) {
+            Broker._base_url = value;
+            if(Broker._instance)
+                Broker._instance = new Broker();
+        }
+    }
+
     /** Provide a singleton pattern, if needed */
     static getInstance() {
         if (!Broker._instance)
@@ -21,7 +30,7 @@ class Broker {
     }
 
     constructor(base_url) {
-        let global_base_url = Broker?.config?.base_url;
+        let global_base_url = Broker._base_url;
         this.base_url = base_url || global_base_url || '';
     }
 
