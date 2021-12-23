@@ -368,4 +368,6 @@ class Broker {
 
 }
 
+export {Broker}
+
 export default Broker.getInstance();
