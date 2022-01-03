@@ -20,6 +20,54 @@ class Broker {
             if(Broker._instance)
                 Broker._instance = new Broker();
         }
+        /** @type {DefaultOptions} */
+        get default_options() {
+            if(!Broker._default_options)
+                Broker._default_options = {
+                    get: {
+                        blob: Broker.config.default_options.get.false,
+                        arraybuffer: false,
+                        cache: false,
+                        timing: false
+                    },
+                    put: {
+                        json: false,
+                        multipart: false
+                    },
+                    post: {
+                        json: false,
+                        multipart: false
+                    },
+                    patch: {
+                        json: false,
+                        multipart: false
+                    }
+                }
+
+            return Broker._default_options
+        }
+
+        /**
+         * @typedef {Object} DefaultOptions default options
+         * @property {Object} DefaultOptions.get default options for get requests
+         * @property {Object} DefaultOptions.get.blob fetch results as a blob
+         * @property {Object} DefaultOptions.get.arraybuffer fetch results as an arraybuffer
+         * @property {Object} DefaultOptions.get.cache allow caching
+         * @property {Object} DefaultOptions.get.timing include server timing
+         * @property {Object} DefaultOptions.put default options for 
+         * @property {Object} DefaultOptions.put.json whether put payload is application/json
+         * @property {Object} DefaultOptions.put.multipart whether put body is multipart form
+         * @property {Object} DefaultOptions.post default options for 
+         * @property {Object} DefaultOptions.post.json whether post payload is application/json
+         * @property {Object} DefaultOptions.patch default options for 
+         * @property {Object} DefaultOptions.patch.json whether patch payload is application/json
+         * @property {Object} DefaultOptions.patch.multipart whether patch body is multipart form
+         * @property {Object} DefaultOptions.patch.multipart whether patch body is multipart form
+         * 
+         */
+        set default_options(value) {
+            Broker._default_options = value;
+        }
     }
 
     /** Provide a singleton pattern, if needed */
@@ -120,12 +168,7 @@ class Broker {
      * @returns {*}
      */
     async get(url, data, options) {
-        options = Object.assign({
-            blob: false,
-            arraybuffer: false,
-            cache: false,
-            timing: false
-        }, options);
+        options = Object.assign(Broker.config.default_options.get, options);
         this.dispatchEvent('loading');
         try {
 
@@ -167,11 +210,7 @@ class Broker {
      * @returns {*}
      */
     async put(url, data, options) {
-        let default_options = {
-            json: false,
-            multipart: false
-        }
-        options = Object.assign(default_options, options);
+        options = Object.assign(Broker.config.default_options.put, options);
         this.dispatchEvent('loading');
         try {
             let put_url = this.base_url + url;
@@ -202,11 +241,7 @@ class Broker {
      * @returns {*}
      */
     async post(url, data, options) {
-        let default_options = {
-            json: false,
-            multipart: false
-        }
-        options = Object.assign(default_options, options);
+        options = Object.assign(Broker.config.default_options.post, options);
         this.dispatchEvent('loading');
         try {
             let post_url = this.base_url + url;
@@ -237,10 +272,7 @@ class Broker {
      * @param {*} options 
      */
     async patch(url, patch, options) {
-        options = Object.assign({
-            json: true,
-            multipart: false
-        },options);
+        options = Object.assign(Broker.config.default_options.patch, options);
         this.dispatchEvent('loading');
         try {
             let patch_url = this.base_url + url;
