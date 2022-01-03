@@ -28,19 +28,26 @@ class Broker {
                         blob: Broker.config.default_options.get.false,
                         arraybuffer: false,
                         cache: false,
-                        timing: false
+                        timing: false,
+                        credentials: 'include'
                     },
                     put: {
                         json: false,
-                        multipart: false
+                        multipart: false,
+                        credentials: 'include'
                     },
                     post: {
                         json: false,
-                        multipart: false
+                        multipart: false,
+                        credentials: 'include'
                     },
                     patch: {
                         json: false,
-                        multipart: false
+                        multipart: false,
+                        credentials: 'include'
+                    },
+                    del: {
+                        credentials: 'include'
                     }
                 }
 
@@ -54,15 +61,20 @@ class Broker {
          * @property {Object} DefaultOptions.get.arraybuffer fetch results as an arraybuffer
          * @property {Object} DefaultOptions.get.cache allow caching
          * @property {Object} DefaultOptions.get.timing include server timing
-         * @property {Object} DefaultOptions.put default options for 
+         * @property {Object} DefaultOptions.get.credentials how/whether credentials and cookies should be included
+         * @property {Object} DefaultOptions.put default options for put
          * @property {Object} DefaultOptions.put.json whether put payload is application/json
          * @property {Object} DefaultOptions.put.multipart whether put body is multipart form
-         * @property {Object} DefaultOptions.post default options for 
+         * @property {Object} DefaultOptions.put.credentials how/whether credentials and cookies should be included
+         * @property {Object} DefaultOptions.post default options for post
          * @property {Object} DefaultOptions.post.json whether post payload is application/json
-         * @property {Object} DefaultOptions.patch default options for 
+         * @property {Object} DefaultOptions.post.credentials how/whether credentials and cookies should be included
+         * @property {Object} DefaultOptions.patch default options for patch
          * @property {Object} DefaultOptions.patch.json whether patch payload is application/json
          * @property {Object} DefaultOptions.patch.multipart whether patch body is multipart form
-         * @property {Object} DefaultOptions.patch.multipart whether patch body is multipart form
+         * @property {Object} DefaultOptions.patch.credentials how/whether credentials and cookies should be included
+         * @property {Object} DefaultOptions.del default options for delete
+         * @property {Object} DefaultOptions.del.credentials how/whether credentials and cookies should be included
          * 
          */
         set default_options(value) {
@@ -181,7 +193,7 @@ class Broker {
             let get_options = {
                     method: 'GET',
                     headers: this.getHeaders({cache: options.cache, blob: options.blob}),
-                    credentials: 'include'
+                    credentials: options.credentials
             };
             if(options.timing) console.timeEnd('broker-get-headers');
             if(!options.cache)
@@ -219,7 +231,7 @@ class Broker {
                     method: 'PUT',
                     headers: this.getHeaders(options),
                     cache: 'no-store',
-                    credentials: 'include',
+                    credentials: options.credentials,
                     body: this.getBody(data, options)
                 });
 
@@ -250,7 +262,7 @@ class Broker {
                     method: 'POST',
                     headers: this.getHeaders(options),
                     cache: 'no-store',
-                    credentials: 'include',
+                    credentials: options.credentials,
                     body: this.getBody(data, options)
                 });
 
@@ -281,7 +293,7 @@ class Broker {
                     method: 'PATCH',
                     headers: this.getHeaders(options),
                     cache: 'no-store',
-                    credentials: 'include',
+                    credentials: options.credentials,
                     body: this.getBody(patch, options)
                 });
 
@@ -303,7 +315,8 @@ class Broker {
      * @param data
      * @returns {*}
      */
-    async del(url, data) {
+    async del(url, data, options) {
+        options = Object.assign(Broker.config.default_options.del, options);
         this.dispatchEvent('loading');
         try {
             let query_string = data ? this.serialize(data) : "";
@@ -314,7 +327,7 @@ class Broker {
                     method: 'DELETE',
                     headers: this.getHeaders(),
                     cache: 'no-store',
-                    credentials: 'include'
+                    credentials: options.credentials,
                 });
 
             let response_body = await this.handleResponse(response);
