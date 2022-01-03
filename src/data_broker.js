@@ -25,7 +25,7 @@ class Broker {
             if(!Broker._default_options)
                 Broker._default_options = {
                     get: {
-                        blob: Broker.config.default_options.get.false,
+                        blob: false,
                         arraybuffer: false,
                         cache: false,
                         timing: false,
