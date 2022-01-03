@@ -340,15 +340,24 @@ class Broker {
                 break;
             case 401: //forbidden - for missing credentials
                 this.dispatchEvent('missing_credentials');
-                throw new Error("401 forbidden")
+                err = new Error("401 forbidden");
+                body = await response.text();
+                err.code = status;
+                err.body = body;
                 break;
             case 403: //unauthorized - don't have permission
                 this.dispatchEvent('unauthorized');
-                throw new Error("403 unauthorized")
+                err = new Error("403 unauthorized")
+                body = await response.text();
+                err.code = status;
+                err.body = body;
                 break;
             case 409: //client out of date
                 this.dispatchEvent('need_update');
-                throw new Error("409 out of date");
+                err = new Error("409 out of date");
+                body = await response.text();
+                err.code = status;
+                err.body = body;
                 break;
             case 418: //I'm a teapot
                 body = await response.text();
