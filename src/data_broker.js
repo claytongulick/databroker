@@ -366,7 +366,7 @@ class Broker {
         if(!options.cache)
             headers['Cache-Control'] = 'no-cache';
         if(options.client_version)
-            headers['client-software-version'] = VERSION;
+            headers['client-software-version'] = options.client_version;
         return headers;
     }
 
