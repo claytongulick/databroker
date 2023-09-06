@@ -319,7 +319,7 @@ class Broker {
         options = Object.assign(Broker.config.default_options.del, options);
         this.dispatchEvent('loading');
         try {
-            let query_string = data ? this.serialize(data) : "";
+            let query_string = data ? this.serializeParams(data) : "";
             if (data) query_string = "?" + query_string;
             let get_url = this.base_url + url + query_string;
             const response = await fetch(get_url,
