@@ -364,9 +364,9 @@ class Broker {
         }
 
         if(options.headers) {
-            if(typeof headers == 'function')
+            if(typeof options.headers == 'function')
                 Object.assign(headers, options.headers());
-            if(typeof headers == "object")
+            if(typeof options.headers == "object")
                 Object.assign(headers, options.headers);
         }
 
