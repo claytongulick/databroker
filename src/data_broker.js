@@ -1,10 +1,5 @@
 "use strict";
 
-//TODO: this needs to be moved to binding since it relys on a ton of native web funcationality - fetch, FormData, encodeURIComponent, etc..
-
-import ApplicationState from 'applicationstate';
-
-
 /**
  * Data broker class, handles communication to the server and returns a promise.
  * Thin wrapper around fetch api.
@@ -355,12 +350,17 @@ class Broker {
         if(options.multipart)
             content_type = 'multipart/form-data';
 
-        let header_token = ApplicationState.get('app.jwt') || "";
-
         let headers = {
             'Content-Type': content_type,
-            'Authorization': 'Bearer ' + header_token
         }
+
+        if(options.headers) {
+            if(typeof headers == 'function')
+                Object.assign(headers, options.headers());
+            if(typeof headers == "object")
+                Object.assign(headers, options.headers);
+        }
+
         if(!options.blob)
             headers['Accept'] = 'application/json';
         if(!options.cache)
