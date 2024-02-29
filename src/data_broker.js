@@ -24,25 +24,30 @@ class Broker {
                         arraybuffer: false,
                         cache: false,
                         timing: false,
-                        credentials: 'include'
+                        credentials: 'include',
+                        headers: {}
                     },
                     put: {
                         json: false,
                         multipart: false,
-                        credentials: 'include'
+                        credentials: 'include',
+                        headers: {}
                     },
                     post: {
                         json: false,
                         multipart: false,
-                        credentials: 'include'
+                        credentials: 'include',
+                        headers: {}
                     },
                     patch: {
                         json: false,
                         multipart: false,
-                        credentials: 'include'
+                        credentials: 'include',
+                        headers: {}
                     },
                     del: {
-                        credentials: 'include'
+                        credentials: 'include',
+                        headers: {}
                     }
                 }
 
@@ -57,20 +62,24 @@ class Broker {
          * @property {Object} DefaultOptions.get.cache allow caching
          * @property {Object} DefaultOptions.get.timing include server timing
          * @property {Object} DefaultOptions.get.credentials how/whether credentials and cookies should be included
+         * @property {Object | function} DefaultOptions.get.headers an object that containers headers to add, or function that returns a headers object
          * @property {Object} DefaultOptions.put default options for put
          * @property {Object} DefaultOptions.put.json whether put payload is application/json
          * @property {Object} DefaultOptions.put.multipart whether put body is multipart form
          * @property {Object} DefaultOptions.put.credentials how/whether credentials and cookies should be included
+         * @property {Object | function} DefaultOptions.put.headers an object that containers headers to add, or function that returns a headers object
          * @property {Object} DefaultOptions.post default options for post
          * @property {Object} DefaultOptions.post.json whether post payload is application/json
          * @property {Object} DefaultOptions.post.credentials how/whether credentials and cookies should be included
+         * @property {Object | function} DefaultOptions.post.headers an object that containers headers to add, or function that returns a headers object
          * @property {Object} DefaultOptions.patch default options for patch
          * @property {Object} DefaultOptions.patch.json whether patch payload is application/json
          * @property {Object} DefaultOptions.patch.multipart whether patch body is multipart form
          * @property {Object} DefaultOptions.patch.credentials how/whether credentials and cookies should be included
+         * @property {Object | function} DefaultOptions.patch.headers an object that containers headers to add, or function that returns a headers object
          * @property {Object} DefaultOptions.del default options for delete
          * @property {Object} DefaultOptions.del.credentials how/whether credentials and cookies should be included
-         * @property {Object | function} DefaultOptions.headers an object that containers headers to add, or function that returns a headers object
+         * @property {Object | function} DefaultOptions.del.headers an object that containers headers to add, or function that returns a headers object
          */
         set default_options(value) {
             Broker._default_options = value;
