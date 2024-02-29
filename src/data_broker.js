@@ -70,7 +70,7 @@ class Broker {
          * @property {Object} DefaultOptions.patch.credentials how/whether credentials and cookies should be included
          * @property {Object} DefaultOptions.del default options for delete
          * @property {Object} DefaultOptions.del.credentials how/whether credentials and cookies should be included
-         * 
+         * @property {Object | function} DefaultOptions.headers an object that containers headers to add, or function that returns a headers object
          */
         set default_options(value) {
             Broker._default_options = value;
@@ -187,7 +187,7 @@ class Broker {
             if(options.timing) console.time('broker-get-headers');
             let get_options = {
                     method: 'GET',
-                    headers: this.getHeaders({cache: options.cache, blob: options.blob}),
+                    headers: this.getHeaders(options),
                     credentials: options.credentials
             };
             if(options.timing) console.timeEnd('broker-get-headers');
@@ -320,7 +320,7 @@ class Broker {
             const response = await fetch(get_url,
                 {
                     method: 'DELETE',
-                    headers: this.getHeaders(),
+                    headers: this.getHeaders(options),
                     cache: 'no-store',
                     credentials: options.credentials,
                 });

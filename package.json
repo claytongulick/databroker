@@ -1,6 +1,6 @@
 {
   "name": "databroker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Utility for simplifying the use of the fetch API",
   "main": "index.js",
   "repository": {
