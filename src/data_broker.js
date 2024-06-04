@@ -184,7 +184,7 @@ class Broker {
      * @returns {*}
      */
     async get(url, data, options) {
-        options = Object.assign(Broker.config.default_options.get, options);
+        options = Object.assign({}, Broker.config.default_options.get, options);
         this.dispatchEvent('loading');
         try {
 
@@ -226,7 +226,7 @@ class Broker {
      * @returns {*}
      */
     async put(url, data, options) {
-        options = Object.assign(Broker.config.default_options.put, options);
+        options = Object.assign({}, Broker.config.default_options.put, options);
         this.dispatchEvent('loading');
         try {
             let put_url = this.base_url + url;
@@ -257,7 +257,7 @@ class Broker {
      * @returns {*}
      */
     async post(url, data, options) {
-        options = Object.assign(Broker.config.default_options.post, options);
+        options = Object.assign({}, Broker.config.default_options.post, options);
         this.dispatchEvent('loading');
         try {
             let post_url = this.base_url + url;
@@ -288,7 +288,7 @@ class Broker {
      * @param {*} options 
      */
     async patch(url, patch, options) {
-        options = Object.assign(Broker.config.default_options.patch, options);
+        options = Object.assign({}, Broker.config.default_options.patch, options);
         this.dispatchEvent('loading');
         try {
             let patch_url = this.base_url + url;
@@ -320,7 +320,7 @@ class Broker {
      * @returns {*}
      */
     async del(url, data, options) {
-        options = Object.assign(Broker.config.default_options.del, options);
+        options = Object.assign({}, Broker.config.default_options.del, options);
         this.dispatchEvent('loading');
         try {
             let query_string = data ? this.serializeParams(data) : "";
