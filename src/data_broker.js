@@ -135,6 +135,8 @@ class Broker {
                                 form_data.append(key,file);
                         else if(typeof val == 'File')
                             form_data.set(key, val);
+                        else if(typeof val == 'Blob')
+                            form_data.set(key, val);
                         else
                             form_data.set(key, JSON.stringify(val));
                 }
